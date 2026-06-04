@@ -814,6 +814,24 @@
 
     <script>
         let progressPollers = new Map();
+
+        window.setDownloadProgress = function (percent) {
+            var value = Math.max(0, Math.min(100, parseInt(percent, 10) || 0));
+            document.querySelectorAll(".box").forEach(function (box) {
+                var btn = box.querySelector(".btn");
+                if (!btn || btn.innerText !== "إعادة التحميل !") return;
+                var progressCont = box.querySelector(".progress-container");
+                var progressBar = box.querySelector(".progress-bar");
+                var progressLabel = box.querySelector(".timer-text");
+                if (progressCont) progressCont.style.display = "block";
+                if (progressBar) progressBar.style.width = value + "%";
+                if (progressLabel) progressLabel.innerText = value + "%";
+                if (value >= 100 && progressPollers.has(box)) {
+                    clearInterval(progressPollers.get(box));
+                    progressPollers.delete(box);
+                }
+            });
+        };
         let tvInsideBox = false;
         let tvActiveBox = null;
         let activeGroupName = "apps";
@@ -1128,8 +1146,7 @@
                     if (isNaN(percent) || percent < 0) percent = 0;
                     if (percent > 100) percent = 100;
                 }
-                if (progressBar) progressBar.style.width = percent + "%";
-                if (progressLabel) progressLabel.innerText = percent + "%";
+                window.setDownloadProgress(percent);
                 if (percent >= 100) {
                     clearInterval(interval);
                     progressPollers.delete(parentBox);
