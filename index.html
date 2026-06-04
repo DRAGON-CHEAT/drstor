@@ -823,6 +823,9 @@
             document.querySelectorAll(".box").forEach(function (box) {
                 var btn = box.querySelector(".btn");
                 if (!btn || btn.innerText !== "إعادة التحميل !") return;
+                var last = parseInt(box.getAttribute("data-dl-progress") || "0", 10);
+                if (value < last) value = last;
+                box.setAttribute("data-dl-progress", String(value));
                 var progressCont = box.querySelector(".progress-container");
                 var progressBar = box.querySelector(".progress-bar");
                 var progressLabel = box.querySelector(".timer-text");
@@ -1137,26 +1140,11 @@
             btnElement.innerText = "إعادة التحميل !";
             if (progressBar) progressBar.style.width = "0%";
             if (progressLabel) progressLabel.innerText = "0%";
+            parentBox.setAttribute("data-dl-progress", "0");
 
             if (window.Android && window.Android.triggerDownload) {
                 window.Android.triggerDownload(url);
             }
-
-            var interval = setInterval(function () {
-                var percent = 0;
-                if (window.Android && window.Android.getDownloadProgress) {
-                    percent = parseInt(window.Android.getDownloadProgress(), 10);
-                    if (isNaN(percent) || percent < 0) percent = 0;
-                    if (percent > 100) percent = 100;
-                }
-                window.setDownloadProgress(percent);
-                if (percent >= 100) {
-                    clearInterval(interval);
-                    progressPollers.delete(parentBox);
-                }
-            }, 250);
-
-            progressPollers.set(parentBox, interval);
         }
 
         function resetBox(boxElement) {
@@ -1176,6 +1164,7 @@
                     }
                     if (progressLabel) progressLabel.innerText = "0%";
                     if (progressBar) progressBar.style.width = "0%";
+                    box.removeAttribute("data-dl-progress");
                 }
             });
 
