@@ -521,6 +521,17 @@
                     0 0 12px rgba(0, 229, 255, 0.55);
             }
 
+            .btn:focus,
+            .btn-clean:focus {
+                outline: none;
+                box-shadow: inset 0 0 0 2px #fff;
+            }
+
+            #group-game .btn:not(.btn-clean):focus {
+                outline: none;
+                box-shadow: inset 0 0 0 2px #fff;
+            }
+
             /* البوكسات: تمرير أفقي يمين/يسار (ليس شبكة) */
             .cards-grid {
                 display: flex;
@@ -615,7 +626,7 @@
                 <button type="button" class="filter-btn apps is-active" data-group="apps" tabindex="0">Apps</button>
                 <button type="button" class="filter-btn game" data-group="game" tabindex="0">Game</button>
             </div>
-        </div>
+    </div>
         <div class="top-glow-down" aria-hidden="true"></div>
     </header>
 
@@ -679,33 +690,33 @@
                             </div>
                         </div>
                     </div>
-                    <div class="box" tabindex="0" onfocus="resetBox(this)">
-                        <div class="title-wrapper">
+        <div class="box" tabindex="0" onfocus="resetBox(this)">
+            <div class="title-wrapper">
                             <h2>DraGon Móveis</h2>
-                        </div>
-                        <div class="btn-group">
+            </div>
+            <div class="btn-group">
                             <button type="button" class="btn" onclick="startAction(this, 'https://github.com/DRAGON-CHEAT/web-view-upd/releases/download/1.3/Ads+Regex+4.0.apk')">تحميل التطبيق</button>
                             <button type="button" class="btn btn-clean" onclick="window.Android.deleteOldApk()"> الغاء تثبيت</button>
-                            <div class="progress-container">
-                                <div class="timer-text">00:00.0</div>
-                                <div class="progress-bar"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="box" tabindex="0" onfocus="resetBox(this)">
-                        <div class="title-wrapper">
-                            <h2>DraGon Móveis</h2>
-                        </div>
-                        <div class="btn-group">
-                            <button type="button" class="btn" onclick="startAction(this, 'https://github.com/DRAGON-CHEAT/web-view-upd/releases/download/1.3/Ads+Regex+4.0.apk')">تحميل التطبيق</button>
-                            <button type="button" class="btn btn-clean" onclick="window.Android.deleteOldApk()"> الغاء تثبيت</button>
-                            <div class="progress-container">
-                                <div class="timer-text">00:00.0</div>
-                                <div class="progress-bar"></div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="progress-container">
+                    <div class="timer-text">00:00.0</div>
+                    <div class="progress-bar"></div>
                 </div>
+            </div>
+        </div>
+        <div class="box" tabindex="0" onfocus="resetBox(this)">
+            <div class="title-wrapper">
+                <h2>DraGon Móveis</h2>
+            </div>
+            <div class="btn-group">
+                            <button type="button" class="btn" onclick="startAction(this, 'https://github.com/DRAGON-CHEAT/web-view-upd/releases/download/1.3/Ads+Regex+4.0.apk')">تحميل التطبيق</button>
+                            <button type="button" class="btn btn-clean" onclick="window.Android.deleteOldApk()"> الغاء تثبيت</button>
+                <div class="progress-container">
+                    <div class="timer-text">00:00.0</div>
+                    <div class="progress-bar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
             </section>
 
             <div class="section-divider" aria-hidden="true"></div>
@@ -1096,26 +1107,26 @@
             var parentBox = btnElement.closest(".box");
             var progressCont = parentBox.querySelector(".progress-container");
             var timerDisplay = parentBox.querySelector(".timer-text");
-
+            
             if (timerIntervals.has(parentBox)) {
                 clearInterval(timerIntervals.get(parentBox));
             }
             progressCont.style.display = "block";
             btnElement.innerText = "إعادة التحميل !";
-
+            
             var startTime = Date.now();
             var interval = setInterval(function () {
                 var elapsedTime = Date.now() - startTime;
                 var minutes = Math.floor(elapsedTime / 60000);
                 var seconds = Math.floor((elapsedTime % 60000) / 1000);
                 var deciseconds = Math.floor((elapsedTime % 1000) / 100);
-
-                timerDisplay.innerText =
-                    (minutes < 10 ? "0" : "") + minutes + ":" +
-                    (seconds < 10 ? "0" : "") + seconds + "." +
+                
+                timerDisplay.innerText = 
+                    (minutes < 10 ? "0" : "") + minutes + ":" + 
+                    (seconds < 10 ? "0" : "") + seconds + "." + 
                     deciseconds;
             }, 100);
-
+            
             timerIntervals.set(parentBox, interval);
             if (window.Android) {
                 window.Android.triggerDownload(url);
@@ -1131,7 +1142,7 @@
 
                     if (progressCont) progressCont.style.display = "none";
                     if (btn && btn.innerText === "إعادة التحميل !") btn.innerText = "تحميل التطبيق";
-
+                    
                     if (timerIntervals.has(box)) {
                         clearInterval(timerIntervals.get(box));
                         timerIntervals.delete(box);
