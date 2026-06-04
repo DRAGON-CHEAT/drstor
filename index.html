@@ -816,7 +816,10 @@
         let progressPollers = new Map();
 
         window.setDownloadProgress = function (percent) {
-            var value = Math.max(0, Math.min(100, parseInt(percent, 10) || 0));
+            var raw = Math.max(0, Math.min(100, parseInt(percent, 10) || 0));
+            var value = Math.floor(raw / 5) * 5;
+            if (raw > 0 && value === 0) value = 5;
+            if (raw >= 100) value = 100;
             document.querySelectorAll(".box").forEach(function (box) {
                 var btn = box.querySelector(".btn");
                 if (!btn || btn.innerText !== "إعادة التحميل !") return;
