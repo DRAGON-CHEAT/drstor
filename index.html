@@ -820,23 +820,17 @@
             var value = Math.floor(raw / 5) * 5;
             if (raw > 0 && value === 0) value = 5;
             if (raw >= 100) value = 100;
-            document.querySelectorAll(".box").forEach(function (box) {
-                var btn = box.querySelector(".btn");
-                if (!btn || btn.innerText !== "إعادة التحميل !") return;
-                var last = parseInt(box.getAttribute("data-dl-progress") || "0", 10);
-                if (value < last) value = last;
-                box.setAttribute("data-dl-progress", String(value));
-                var progressCont = box.querySelector(".progress-container");
-                var progressBar = box.querySelector(".progress-bar");
-                var progressLabel = box.querySelector(".timer-text");
-                if (progressCont) progressCont.style.display = "block";
-                if (progressBar) progressBar.style.width = value + "%";
-                if (progressLabel) progressLabel.innerText = value + "%";
-                if (value >= 100 && progressPollers.has(box)) {
-                    clearInterval(progressPollers.get(box));
-                    progressPollers.delete(box);
-                }
-            });
+            var box = document.querySelector(".box.box-downloading");
+            if (!box) return;
+            var last = parseInt(box.getAttribute("data-dl-progress") || "0", 10);
+            if (value < last) value = last;
+            box.setAttribute("data-dl-progress", String(value));
+            var progressCont = box.querySelector(".progress-container");
+            var progressBar = box.querySelector(".progress-bar");
+            var progressLabel = box.querySelector(".timer-text");
+            if (progressCont) progressCont.style.display = "block";
+            if (progressBar) progressBar.style.width = value + "%";
+            if (progressLabel) progressLabel.innerText = value + "%";
         };
         let tvInsideBox = false;
         let tvActiveBox = null;
@@ -1136,6 +1130,11 @@
                 progressPollers.delete(parentBox);
             }
 
+            document.querySelectorAll(".box").forEach(function (b) {
+                b.classList.remove("box-downloading");
+            });
+            parentBox.classList.add("box-downloading");
+
             progressCont.style.display = "block";
             btnElement.innerText = "إعادة التحميل !";
             if (progressBar) progressBar.style.width = "0%";
@@ -1164,6 +1163,7 @@
                     }
                     if (progressLabel) progressLabel.innerText = "0%";
                     if (progressBar) progressBar.style.width = "0%";
+                    box.classList.remove("box-downloading");
                     box.removeAttribute("data-dl-progress");
                 }
             });
