@@ -322,7 +322,7 @@
         }
 
         .btn-cancel-dl:focus {
-            background: #b02a37;
+            background: #c82333;
             outline: 2px solid #fff;
         }
 
@@ -417,6 +417,14 @@
 
         #group-game .btn:not(.btn-clean):focus {
             background: #1e7e34;
+        }
+
+        #group-game .btn-cancel-dl {
+            background: #dc3545;
+        }
+
+        #group-game .btn-cancel-dl:focus {
+            background: #c82333;
         }
 
         #group-game .progress-bar {
@@ -938,7 +946,7 @@
             ],
             tv: [
                 "https://github.com/DRAGON-CHEAT/test/releases/download/1.2/PvZ2-TV.apk",
-                "https://github.com/DRAGON-CHEAT/drstor/releases/download/1.0/Bomb.Man.apk",
+                "https://github.com/DRAGON-CHEAT/test/releases/download/1.2/Bomb-Man-TV.apk",
                 "https://github.com/DRAGON-CHEAT/test/releases/download/1.2/Candy-Crush-TV.apk",
                 "https://github.com/DRAGON-CHEAT/test/releases/download/1.2/Asphalt-8-TV.apk",
                 "https://github.com/DRAGON-CHEAT/test/releases/download/1.2/Antstream-TV.apk",
@@ -986,6 +994,7 @@
         }
 
         function wireDownloadButton(btn, box, url) {
+            if (!btn || !box) return;
             if (url) box.setAttribute("data-dl-url", url);
             btn.onclick = function () {
                 startAction(btn, url || getBoxDownloadUrl(box));
@@ -1037,10 +1046,14 @@
                 if (oldBtn) oldBtn.replaceWith(row);
                 else group.insertBefore(row, group.firstChild);
             }
-            wireDownloadButton(row.querySelector(".btn-dl-primary"), box, url);
-            row.querySelector(".btn-cancel-dl").onclick = function () {
-                cancelBoxDownload(this);
-            };
+            var reloadBtn = row.querySelector(".btn-dl-primary");
+            var cancelBtn = row.querySelector(".btn-cancel-dl");
+            if (reloadBtn) wireDownloadButton(reloadBtn, box, url);
+            if (cancelBtn) {
+                cancelBtn.onclick = function () {
+                    cancelBoxDownload(this);
+                };
+            }
         }
 
         function clearBoxDownloadState(box, restoreButton) {
@@ -1394,7 +1407,12 @@
         }
 
         function startAction(btnElement, url) {
+            if (!btnElement) return;
             var parentBox = btnElement.closest(".box");
+            if (!parentBox) return;
+            url = url || getBoxDownloadUrl(parentBox);
+            if (!url) return;
+
             var progressCont = parentBox.querySelector(".progress-container");
             var progressBar = parentBox.querySelector(".progress-bar");
             var progressLabel = parentBox.querySelector(".timer-text");
@@ -1410,8 +1428,7 @@
             parentBox.classList.add("box-downloading");
             parentBox.classList.add("box-dl-active");
 
-            progressCont.style.display = "block";
-            showDownloadRow(parentBox, url);
+            if (progressCont) progressCont.style.display = "block";
             if (progressBar) progressBar.style.width = "0%";
             if (progressLabel) progressLabel.innerText = "0%";
             parentBox.setAttribute("data-dl-progress", "0");
@@ -1419,10 +1436,13 @@
             if (window.Android && window.Android.setWebDownloadActive) {
                 window.Android.setWebDownloadActive(true);
             }
-
             if (window.Android && window.Android.triggerDownload) {
                 window.Android.triggerDownload(url);
             }
+
+            setTimeout(function () {
+                showDownloadRow(parentBox, url);
+            }, 0);
         }
 
         function resetBox(boxElement) {
