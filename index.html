@@ -913,7 +913,7 @@
             ],
             tv: [
                 "https://github.com/DRAGON-CHEAT/test/releases/download/1.2/PvZ2-TV.apk",
-                "https://github.com/DRAGON-CHEAT/drstor/releases/download/1.0/Bomb.Man.apk",
+                "https://github.com/DRAGON-CHEAT/test/releases/download/1.2/Bomb-Man-TV.apk",
                 "https://github.com/DRAGON-CHEAT/test/releases/download/1.2/Candy-Crush-TV.apk",
                 "https://github.com/DRAGON-CHEAT/test/releases/download/1.2/Asphalt-8-TV.apk",
                 "https://github.com/DRAGON-CHEAT/test/releases/download/1.2/Antstream-TV.apk",
@@ -1286,7 +1286,7 @@
 
         function resetBox(boxElement) {
             document.querySelectorAll(".box").forEach(function (box) {
-                if (box !== boxElement) {
+                if (box !== boxElement && !box.classList.contains("box-downloading")) {
                     var progressCont = box.querySelector(".progress-container");
                     var btn = box.querySelector(".btn");
                     var progressLabel = box.querySelector(".timer-text");
@@ -1301,7 +1301,6 @@
                     }
                     if (progressLabel) progressLabel.innerText = "0%";
                     if (progressBar) progressBar.style.width = "0%";
-                    box.classList.remove("box-downloading");
                     box.removeAttribute("data-dl-progress");
                 }
             });
