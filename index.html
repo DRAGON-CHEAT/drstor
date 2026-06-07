@@ -951,6 +951,29 @@
             });
         }
 
+        window.clearAllDownloadUi = function () {
+            document.querySelectorAll(".box.box-dl-active, .box.box-downloading").forEach(function (box) {
+                box.classList.remove("box-dl-active", "box-downloading");
+                var progressCont = box.querySelector(".progress-container");
+                var btn = box.querySelector(".btn-group .btn:not(.btn-clean)");
+                var progressLabel = box.querySelector(".timer-text");
+                var progressBar = box.querySelector(".progress-bar");
+
+                if (progressCont) progressCont.style.display = "none";
+                if (btn && btn.innerText === "إعادة التحميل !") btn.innerText = "تحميل التطبيق";
+                if (progressPollers.has(box)) {
+                    clearInterval(progressPollers.get(box));
+                    progressPollers.delete(box);
+                }
+                if (progressLabel) progressLabel.innerText = "0%";
+                if (progressBar) progressBar.style.width = "0%";
+                box.removeAttribute("data-dl-progress");
+            });
+            if (window.Android && window.Android.setWebDownloadActive) {
+                window.Android.setWebDownloadActive(false);
+            }
+        };
+
         window.setDownloadProgress = function (percent) {
             var raw = Math.max(0, Math.min(100, parseInt(percent, 10) || 0));
             var value = Math.floor(raw / 5) * 5;
@@ -1179,15 +1202,20 @@
         }
 
         function handleTvKeydown(e) {
-            if (isMobileView()) return;
-
             if (isBackKey(e)) {
-                if (tvInsideBox) {
+                if (!isMobileView() && tvInsideBox) {
                     exitTvBox();
+                    e.preventDefault();
+                    return;
+                }
+                if (window.Android && window.Android.handleStoreBack) {
+                    window.Android.handleStoreBack();
                     e.preventDefault();
                 }
                 return;
             }
+
+            if (isMobileView()) return;
 
             if (isEnterKey(e) && !tvInsideBox) {
                 var active = document.activeElement;
@@ -1280,6 +1308,10 @@
             if (progressBar) progressBar.style.width = "0%";
             if (progressLabel) progressLabel.innerText = "0%";
             parentBox.setAttribute("data-dl-progress", "0");
+
+            if (window.Android && window.Android.setWebDownloadActive) {
+                window.Android.setWebDownloadActive(true);
+            }
 
             if (window.Android && window.Android.triggerDownload) {
                 window.Android.triggerDownload(url);
