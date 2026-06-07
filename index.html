@@ -958,6 +958,7 @@
             if (raw >= 100) value = 100;
             var box = document.querySelector(".box.box-downloading");
             if (!box) return;
+            box.classList.add("box-dl-active");
             var last = parseInt(box.getAttribute("data-dl-progress") || "0", 10);
             if (value < last) value = last;
             box.setAttribute("data-dl-progress", String(value));
@@ -1272,6 +1273,7 @@
                 b.classList.remove("box-downloading");
             });
             parentBox.classList.add("box-downloading");
+            parentBox.classList.add("box-dl-active");
 
             progressCont.style.display = "block";
             btnElement.innerText = "إعادة التحميل !";
@@ -1286,7 +1288,7 @@
 
         function resetBox(boxElement) {
             document.querySelectorAll(".box").forEach(function (box) {
-                if (box !== boxElement && !box.classList.contains("box-downloading")) {
+                if (box !== boxElement && !box.classList.contains("box-dl-active")) {
                     var progressCont = box.querySelector(".progress-container");
                     var btn = box.querySelector(".btn");
                     var progressLabel = box.querySelector(".timer-text");
