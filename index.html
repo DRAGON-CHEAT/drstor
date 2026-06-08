@@ -933,6 +933,7 @@
                 var sectionNames = names[key] || [];
                 var sectionLinks = links[key] || [];
                 section.querySelectorAll(".cards-grid .box").forEach(function (box, index) {
+                    box.setAttribute("data-dl-key", kind + "-" + key + "-" + index);
                     if (sectionImages[index]) {
                         box.style.backgroundImage = "url('" + sectionImages[index] + "')";
                     }
@@ -965,16 +966,27 @@
             if (progressLabel) progressLabel.innerText = value + "%";
         }
 
-        window.setDownloadProgress = function (percent) {
+        window.setDownloadProgress = function (percent, boxKey) {
             var raw = Math.max(0, Math.min(100, parseInt(percent, 10) || 0));
             var value = Math.floor(raw / 5) * 5;
             if (raw > 0 && value === 0) value = 5;
             if (raw >= 100) value = 100;
-            var box = activeDownloadBox;
-            if (!box || !box.classList.contains("box-downloading")) {
+            var box = null;
+            if (boxKey) {
+                box = document.querySelector('.box[data-dl-key="' + boxKey + '"]');
+            }
+            if (!box && activeDownloadBox) {
+                box = activeDownloadBox;
+            }
+            if (!box) {
                 box = document.querySelector(".box.box-downloading");
             }
             if (!box) return;
+            if (!box.classList.contains("box-downloading")) {
+                box.classList.add("box-downloading");
+                var dlBtn = box.querySelector(".btn-group .btn:not(.btn-clean)");
+                if (dlBtn) dlBtn.innerText = "إعادة التحميل !";
+            }
             applyProgressToBox(box, value);
         };
         let tvInsideBox = false;
@@ -1287,7 +1299,8 @@
             parentBox.setAttribute("data-dl-progress", "0");
 
             if (window.Android && window.Android.triggerDownload) {
-                window.Android.triggerDownload(url);
+                var boxKey = parentBox.getAttribute("data-dl-key") || "";
+                window.Android.triggerDownload(url, boxKey);
             }
         }
 
