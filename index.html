@@ -1315,12 +1315,33 @@
             }
         }
 
+        function resetBoxDownloadUi(parentBox) {
+            parentBox.classList.remove("box-downloading");
+            parentBox.removeAttribute("data-dl-progress");
+
+            var progressCont = parentBox.querySelector(".progress-container");
+            var progressBar = parentBox.querySelector(".progress-bar");
+            var progressLabel = parentBox.querySelector(".timer-text");
+            var dlBtn = parentBox.querySelector(".btn-dl") || parentBox.querySelector(".btn-group .btn");
+
+            if (progressCont) progressCont.style.display = "none";
+            if (progressBar) progressBar.style.width = "0%";
+            if (progressLabel) progressLabel.innerText = "0%";
+            if (dlBtn) dlBtn.innerText = "تحميل التطبيق";
+        }
+
         function cleanupAllBoxDownloads() {
             progressPollers.forEach(function (pollId) {
                 clearInterval(pollId);
             });
             progressPollers.clear();
             activeDownloadBox = null;
+
+            document.querySelectorAll(".box").forEach(function (box) {
+                if (box.classList.contains("box-downloading") || box.getAttribute("data-dl-progress")) {
+                    resetBoxDownloadUi(box);
+                }
+            });
         }
 
         window.onStoreBackCleanup = cleanupAllBoxDownloads;
