@@ -946,7 +946,7 @@
         function apkFileNameFromUrl(url) {
             var seg = (url || "").split("/").pop() || "app.apk";
             seg = seg.split("?")[0];
-            return "DragonUpdate_" + seg.replace(/[^a-zA-Z0-9._+\-]/g, "_");
+            return "DragonUpdate_" + seg;
         }
 
         function setupBoxDownloadUi(box, url) {
@@ -1396,7 +1396,7 @@
             parentBox.setAttribute("data-dl-progress", "0");
 
             if (window.Android && window.Android.triggerDownload) {
-                window.Android.triggerDownload(url, fileName);
+                window.Android.triggerDownload(url);
             }
         }
 
