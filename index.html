@@ -367,6 +367,24 @@
             font-weight: bold;
         }
 
+        .dl-back-toast {
+            position: fixed;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10000;
+            background: rgba(12, 22, 35, 0.95);
+            color: #fff;
+            border: 1px solid rgba(0, 180, 255, 0.45);
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: calc(var(--btn-size) + 1px);
+            font-weight: 700;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+            display: none;
+            pointer-events: none;
+        }
+
         @keyframes move {
             from { background-position: 200% 0; }
             to { background-position: -200% 0; }
@@ -829,9 +847,23 @@
         <div class="footer">Build by DraGon Show™_2026</div>
     </div>
 
+    <div id="dl-back-toast" class="dl-back-toast" aria-live="polite">يوجد تطبيق قيد تحميل</div>
+
     <script>
         let progressPollers = new Map();
         let activeDownloadBox = null;
+
+        window.showDownloadBackWarning = function () {
+            var el = document.getElementById("dl-back-toast");
+            if (!el) return;
+            el.style.display = "block";
+            if (window._dlBackToastTimer) {
+                clearTimeout(window._dlBackToastTimer);
+            }
+            window._dlBackToastTimer = setTimeout(function () {
+                el.style.display = "none";
+            }, 3500);
+        };
 
         var APP_BOX_IMAGES = {
             android: [
