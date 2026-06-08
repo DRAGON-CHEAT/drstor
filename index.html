@@ -829,6 +829,7 @@
     <script>
         let progressPollers = new Map();
         let activeDownloadBox = null;
+        let cancelledBoxKeys = new Set();
 
         var APP_BOX_IMAGES = {
             android: [
@@ -975,10 +976,13 @@
                             cancelBtn.type = "button";
                             cancelBtn.className = "btn btn-cancel";
                             cancelBtn.innerText = "إلغاء التحميل";
-                            cancelBtn.addEventListener("click", function (e) {
+                            cancelBtn.tabIndex = 0;
+                            cancelBtn.onclick = function (e) {
+                                e.preventDefault();
                                 e.stopPropagation();
                                 cancelAction(box);
-                            });
+                                return false;
+                            };
                             wrap.appendChild(cancelBtn);
                         }
                     }
@@ -1007,6 +1011,7 @@
         }
 
         window.setDownloadProgress = function (percent, boxKey) {
+            if (boxKey && cancelledBoxKeys.has(boxKey)) return;
             var raw = Math.max(0, Math.min(100, parseInt(percent, 10) || 0));
             var value = Math.floor(raw / 5) * 5;
             if (raw > 0 && value === 0) value = 5;
@@ -1249,6 +1254,20 @@
                 return;
             }
 
+            if (isEnterKey(e) && tvInsideBox) {
+                var focusedBtn = document.activeElement;
+                if (focusedBtn && focusedBtn.classList.contains("btn")) {
+                    if (focusedBtn.classList.contains("btn-cancel")) {
+                        var cancelBox = focusedBtn.closest(".box");
+                        if (cancelBox) cancelAction(cancelBox);
+                    } else {
+                        focusedBtn.click();
+                    }
+                    e.preventDefault();
+                    return;
+                }
+            }
+
             if (isEnterKey(e) && !tvInsideBox) {
                 var active = document.activeElement;
                 if (active && active.classList.contains("filter-btn")) {
@@ -1287,6 +1306,15 @@
                 }
 
                 if (active && active.classList.contains("btn")) {
+                    var wrap = active.closest(".btn-download-wrap");
+                    if (wrap && (dir === "left" || dir === "right")) {
+                        if (moveBtnRowFocus(dir, wrap, active)) {
+                            scrollFocusIntoView(box);
+                            e.preventDefault();
+                            return;
+                        }
+                    }
+
                     var btns = Array.prototype.slice.call(box.querySelectorAll(".btn"));
                     var btnIndex = btns.indexOf(active);
                     if (dir === "down" && btnIndex < btns.length - 1) {
@@ -1318,18 +1346,44 @@
             }
         }
 
+        function moveBtnRowFocus(direction, wrap, current) {
+            var btns = Array.prototype.slice.call(wrap.querySelectorAll(".btn"));
+            if (!current || btns.length < 2) return false;
+            var cc = elementCenter(current);
+            var best = null;
+            var bestScore = Infinity;
+            btns.forEach(function (btn) {
+                if (btn === current) return;
+                var ec = elementCenter(btn);
+                var dx = ec.x - cc.x;
+                var ok = (direction === "left" && dx < -10) || (direction === "right" && dx > 10);
+                if (!ok) return;
+                var score = Math.abs(dx);
+                if (score < bestScore) {
+                    bestScore = score;
+                    best = btn;
+                }
+            });
+            if (best) {
+                best.focus();
+                return true;
+            }
+            return false;
+        }
+
         function cancelAction(box) {
             if (!box) return;
             var boxKey = box.getAttribute("data-dl-key") || "";
+            cancelledBoxKeys.add(boxKey);
+
             if (progressPollers.has(box)) {
                 clearInterval(progressPollers.get(box));
                 progressPollers.delete(box);
             }
-            if (window.Android && window.Android.cancelDownload) {
-                window.Android.cancelDownload(boxKey);
-            }
+
             box.classList.remove("box-downloading");
             if (activeDownloadBox === box) activeDownloadBox = null;
+
             var progressCont = box.querySelector(".progress-container");
             var progressBar = box.querySelector(".progress-bar");
             var progressLabel = box.querySelector(".timer-text");
@@ -1341,7 +1395,14 @@
             if (dlBtn) dlBtn.innerText = "تحميل التطبيق";
             if (cancelBtn) cancelBtn.style.display = "none";
             box.removeAttribute("data-dl-progress");
+
+            if (window.Android && window.Android.cancelDownload) {
+                try {
+                    window.Android.cancelDownload(boxKey);
+                } catch (err) {}
+            }
         }
+        window.cancelAction = cancelAction;
 
         function startAction(btnElement, url) {
             var parentBox = btnElement.closest(".box");
@@ -1368,6 +1429,7 @@
 
             if (window.Android && window.Android.triggerDownload) {
                 var boxKey = parentBox.getAttribute("data-dl-key") || "";
+                cancelledBoxKeys.delete(boxKey);
                 window.Android.triggerDownload(url, boxKey);
                 var pollFn = window.Android.getDownloadProgressForBox || window.Android.getDownloadProgress;
                 if (pollFn) {
