@@ -1347,6 +1347,33 @@
             }
         }
 
+        window.resetAllDownloadUi = function () {
+            progressPollers.forEach(function (pollId) {
+                clearInterval(pollId);
+            });
+            progressPollers.clear();
+            document.querySelectorAll(".box.box-downloading").forEach(function (parentBox) {
+                parentBox.classList.remove("box-downloading");
+                parentBox.removeAttribute("data-dl-progress");
+                var progressCont = parentBox.querySelector(".progress-container");
+                var progressBar = parentBox.querySelector(".progress-bar");
+                var progressLabel = parentBox.querySelector(".timer-text");
+                var dlBtn = parentBox.querySelector(".btn-dl");
+                if (progressCont) progressCont.style.display = "none";
+                if (progressBar) progressBar.style.width = "0%";
+                if (progressLabel) progressLabel.innerText = "0%";
+                if (dlBtn) dlBtn.innerText = "تحميل التطبيق";
+            });
+            activeDownloadBox = null;
+        };
+
+        window.cancelAllDownloads = function () {
+            window.resetAllDownloadUi();
+            if (window.Android && window.Android.cancelAllBoxDownloads) {
+                window.Android.cancelAllBoxDownloads();
+            }
+        };
+
         function startAction(btnElement, url) {
             var parentBox = btnElement.closest(".box");
             var progressCont = parentBox.querySelector(".progress-container");
@@ -1412,18 +1439,6 @@
                 scrollFocusIntoView(boxElement);
             }
         }
-
-        function cleanupAllDownloadsOnLeave() {
-            progressPollers.forEach(function (pollId) {
-                clearInterval(pollId);
-            });
-            progressPollers.clear();
-            if (window.Android && window.Android.cleanupAllDownloadsOnBack) {
-                window.Android.cleanupAllDownloadsOnBack();
-            }
-        }
-
-        window.addEventListener("pagehide", cleanupAllDownloadsOnLeave);
 
         setupTvFocusables();
         applyBoxMeta(document.getElementById("group-apps"), "apps");
