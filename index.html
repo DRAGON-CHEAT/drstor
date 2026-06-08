@@ -1282,6 +1282,21 @@
                 if (tvInsideBox) {
                     exitTvBox();
                     e.preventDefault();
+                    return;
+                }
+                if (document.querySelector(".box.box-downloading")) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (window._storeBackWarnShown) {
+                        window._storeBackWarnShown = false;
+                        if (window.Android && window.Android.finishStoreActivity) {
+                            window.Android.finishStoreActivity();
+                        }
+                    } else {
+                        window._storeBackWarnShown = true;
+                        showDownloadBackWarning();
+                    }
+                    return;
                 }
                 return;
             }
@@ -1381,6 +1396,7 @@
             if (activeDownloadBox === parentBox) {
                 activeDownloadBox = null;
             }
+            window._storeBackWarnShown = false;
 
             if (window.Android && window.Android.cancelBoxDownload) {
                 window.Android.cancelBoxDownload(boxKey);
@@ -1400,6 +1416,7 @@
 
             parentBox.classList.add("box-downloading");
             activeDownloadBox = parentBox;
+            window._storeBackWarnShown = false;
 
             progressCont.style.display = "block";
             btnElement.innerText = "إعادة التحميل !";
