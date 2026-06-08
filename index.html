@@ -301,6 +301,28 @@
 
         .btn-clean:focus { background: #555b65; }
 
+        .btn-download-wrap {
+            display: flex;
+            gap: 6px;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        .btn-download-wrap .btn {
+            flex: 1;
+            margin: 0;
+            width: auto;
+        }
+
+        .btn-cancel {
+            background: #b91c1c;
+            display: none;
+        }
+
+        .btn-cancel:focus { background: #991b1b; }
+
+        .box-downloading .btn-cancel { display: block; }
+
         .progress-container {
             width: 100%;
             background: #333;
@@ -941,7 +963,25 @@
                     if (titleEl && sectionNames[index]) {
                         titleEl.textContent = sectionNames[index];
                     }
-                    var downloadBtn = box.querySelector(".btn-group .btn:not(.btn-clean)");
+                    var downloadBtn = box.querySelector(".btn-group .btn:not(.btn-clean):not(.btn-cancel)");
+                    if (downloadBtn) {
+                        downloadBtn.classList.add("btn-download");
+                        if (!box.querySelector(".btn-download-wrap")) {
+                            var wrap = document.createElement("div");
+                            wrap.className = "btn-download-wrap";
+                            downloadBtn.parentNode.insertBefore(wrap, downloadBtn);
+                            wrap.appendChild(downloadBtn);
+                            var cancelBtn = document.createElement("button");
+                            cancelBtn.type = "button";
+                            cancelBtn.className = "btn btn-cancel";
+                            cancelBtn.innerText = "إلغاء التحميل";
+                            cancelBtn.addEventListener("click", function (e) {
+                                e.stopPropagation();
+                                cancelAction(box);
+                            });
+                            wrap.appendChild(cancelBtn);
+                        }
+                    }
                     if (downloadBtn && sectionLinks[index]) {
                         (function (btn, link) {
                             btn.onclick = function () {
@@ -984,7 +1024,7 @@
             if (!box) return;
             if (!box.classList.contains("box-downloading")) {
                 box.classList.add("box-downloading");
-                var dlBtn = box.querySelector(".btn-group .btn:not(.btn-clean)");
+                var dlBtn = box.querySelector(".btn-group .btn-download");
                 if (dlBtn) dlBtn.innerText = "إعادة التحميل !";
             }
             applyProgressToBox(box, value);
@@ -1278,6 +1318,31 @@
             }
         }
 
+        function cancelAction(box) {
+            if (!box) return;
+            var boxKey = box.getAttribute("data-dl-key") || "";
+            if (progressPollers.has(box)) {
+                clearInterval(progressPollers.get(box));
+                progressPollers.delete(box);
+            }
+            if (window.Android && window.Android.cancelDownload) {
+                window.Android.cancelDownload(boxKey);
+            }
+            box.classList.remove("box-downloading");
+            if (activeDownloadBox === box) activeDownloadBox = null;
+            var progressCont = box.querySelector(".progress-container");
+            var progressBar = box.querySelector(".progress-bar");
+            var progressLabel = box.querySelector(".timer-text");
+            var dlBtn = box.querySelector(".btn-group .btn-download");
+            var cancelBtn = box.querySelector(".btn-cancel");
+            if (progressCont) progressCont.style.display = "none";
+            if (progressBar) progressBar.style.width = "0%";
+            if (progressLabel) progressLabel.innerText = "0%";
+            if (dlBtn) dlBtn.innerText = "تحميل التطبيق";
+            if (cancelBtn) cancelBtn.style.display = "none";
+            box.removeAttribute("data-dl-progress");
+        }
+
         function startAction(btnElement, url) {
             var parentBox = btnElement.closest(".box");
             var progressCont = parentBox.querySelector(".progress-container");
@@ -1297,6 +1362,9 @@
             if (progressBar) progressBar.style.width = "0%";
             if (progressLabel) progressLabel.innerText = "0%";
             parentBox.setAttribute("data-dl-progress", "0");
+
+            var cancelBtn = parentBox.querySelector(".btn-cancel");
+            if (cancelBtn) cancelBtn.style.display = "block";
 
             if (window.Android && window.Android.triggerDownload) {
                 var boxKey = parentBox.getAttribute("data-dl-key") || "";
@@ -1320,12 +1388,14 @@
             document.querySelectorAll(".box").forEach(function (box) {
                 if (box !== boxElement && !box.classList.contains("box-downloading")) {
                     var progressCont = box.querySelector(".progress-container");
-                    var btn = box.querySelector(".btn");
+                    var btn = box.querySelector(".btn-download");
+                    var cancelBtn = box.querySelector(".btn-cancel");
                     var progressLabel = box.querySelector(".timer-text");
                     var progressBar = box.querySelector(".progress-bar");
 
                     if (progressCont) progressCont.style.display = "none";
                     if (btn && btn.innerText === "إعادة التحميل !") btn.innerText = "تحميل التطبيق";
+                    if (cancelBtn) cancelBtn.style.display = "none";
 
                     if (progressPollers.has(box)) {
                         clearInterval(progressPollers.get(box));
