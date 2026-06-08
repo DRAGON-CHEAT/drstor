@@ -1301,6 +1301,18 @@
             if (window.Android && window.Android.triggerDownload) {
                 var boxKey = parentBox.getAttribute("data-dl-key") || "";
                 window.Android.triggerDownload(url, boxKey);
+                var pollFn = window.Android.getDownloadProgressForBox || window.Android.getDownloadProgress;
+                if (pollFn) {
+                    var pollId = setInterval(function () {
+                        var pct = pollFn.call(window.Android, boxKey);
+                        window.setDownloadProgress(pct, boxKey);
+                        if (pct >= 100) {
+                            clearInterval(pollId);
+                            progressPollers.delete(parentBox);
+                        }
+                    }, 250);
+                    progressPollers.set(parentBox, pollId);
+                }
             }
         }
 
