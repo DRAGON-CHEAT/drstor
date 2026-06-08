@@ -1413,6 +1413,18 @@
             }
         }
 
+        function cleanupAllDownloadsOnLeave() {
+            progressPollers.forEach(function (pollId) {
+                clearInterval(pollId);
+            });
+            progressPollers.clear();
+            if (window.Android && window.Android.cleanupAllDownloadsOnBack) {
+                window.Android.cleanupAllDownloadsOnBack();
+            }
+        }
+
+        window.addEventListener("pagehide", cleanupAllDownloadsOnLeave);
+
         setupTvFocusables();
         applyBoxMeta(document.getElementById("group-apps"), "apps");
         initGameGroup();
