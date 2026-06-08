@@ -1023,11 +1023,7 @@
                 box = document.querySelector(".box.box-downloading");
             }
             if (!box) return;
-            if (!box.classList.contains("box-downloading")) {
-                box.classList.add("box-downloading");
-                var dlBtn = box.querySelector(".btn-dl");
-                if (dlBtn) dlBtn.innerText = "إعادة التحميل !";
-            }
+            if (!box.classList.contains("box-downloading")) return;
             applyProgressToBox(box, value);
         };
         let tvInsideBox = false;
@@ -1329,10 +1325,6 @@
                 progressPollers.delete(parentBox);
             }
 
-            if (window.Android && window.Android.cancelBoxDownload) {
-                window.Android.cancelBoxDownload(boxKey);
-            }
-
             parentBox.classList.remove("box-downloading");
             parentBox.removeAttribute("data-dl-progress");
 
@@ -1340,16 +1332,18 @@
             var progressBar = parentBox.querySelector(".progress-bar");
             var progressLabel = parentBox.querySelector(".timer-text");
             var dlBtn = parentBox.querySelector(".btn-dl");
-            var cancelBtn = parentBox.querySelector(".btn-cancel");
 
             if (progressCont) progressCont.style.display = "none";
             if (progressBar) progressBar.style.width = "0%";
             if (progressLabel) progressLabel.innerText = "0%";
             if (dlBtn) dlBtn.innerText = "تحميل التطبيق";
-            if (cancelBtn) cancelBtn.style.display = "none";
 
             if (activeDownloadBox === parentBox) {
                 activeDownloadBox = null;
+            }
+
+            if (window.Android && window.Android.cancelBoxDownload) {
+                window.Android.cancelBoxDownload(boxKey);
             }
         }
 
