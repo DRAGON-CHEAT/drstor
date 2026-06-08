@@ -855,8 +855,16 @@
 
         window.showDownloadBackWarning = function () {
             var el = document.getElementById("dl-back-toast");
-            if (!el) return;
+            if (!el) {
+                el = document.createElement("div");
+                el.id = "dl-back-toast";
+                el.className = "dl-back-toast";
+                el.innerText = "يوجد تطبيق قيد تحميل";
+                document.body.appendChild(el);
+            }
             el.style.display = "block";
+            el.style.visibility = "visible";
+            el.style.opacity = "1";
             if (window._dlBackToastTimer) {
                 clearTimeout(window._dlBackToastTimer);
             }
