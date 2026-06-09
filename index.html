@@ -1059,7 +1059,6 @@
                     }
                 });
             });
-            restoreBoxModes(root);
         }
 
         function saveBoxMode(boxKey, mode) {
@@ -1074,8 +1073,12 @@
             scope.querySelectorAll(".box[data-dl-key]").forEach(function (box) {
                 var boxKey = box.getAttribute("data-dl-key") || "";
                 var canInstall = false;
-                if (window.Android && window.Android.isBoxReadyForInstall) {
-                    canInstall = !!window.Android.isBoxReadyForInstall(boxKey);
+                try {
+                    if (window.Android && window.Android.isBoxReadyForInstall) {
+                        canInstall = !!window.Android.isBoxReadyForInstall(boxKey);
+                    }
+                } catch (e) {
+                    canInstall = false;
                 }
                 var saved = "";
                 try { saved = localStorage.getItem("dlmode_" + boxKey) || ""; } catch (e) {}
@@ -1260,6 +1263,9 @@
 
         function activateGroupFromFilter(btn) {
             if (!btn || !btn.dataset.group) return;
+            if (btn.dataset.group === "game") {
+                initGameGroup();
+            }
             switchGroup(btn.dataset.group);
         }
 
@@ -1556,10 +1562,15 @@
             }
         }
 
+        function bootstrapStore() {
+            applyBoxMeta(document.getElementById("group-apps"), "apps");
+            initGameGroup();
+            restoreBoxModes(document);
+            updateGroupFocusability();
+        }
+
         setupTvFocusables();
-        applyBoxMeta(document.getElementById("group-apps"), "apps");
-        initGameGroup();
-        updateGroupFocusability();
+        bootstrapStore();
 
         document.querySelectorAll(".filter-btn").forEach(function (btn) {
             btn.addEventListener("click", function () {
@@ -1591,7 +1602,7 @@
         window.addEventListener("load", function () {
             applyBoxMeta(document.getElementById("group-apps"), "apps");
             initGameGroup();
-            restoreBoxModes(document);
+            try { restoreBoxModes(document); } catch (e) {}
             setupTvFocusables();
             updateGroupFocusability();
             updateTvSectionHeads();
