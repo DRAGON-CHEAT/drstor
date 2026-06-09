@@ -1068,14 +1068,37 @@
             } catch (e) {}
         }
 
+        function exitMode1(box) {
+            if (!box) return;
+            var boxKey = box.getAttribute("data-dl-key") || "";
+            box.classList.remove("box-mode-2", "box-ready-install", "box-no-install", "box-downloading");
+            saveBoxMode(boxKey, null);
+            var dlBtn = box.querySelector(".btn-dl");
+            if (dlBtn) {
+                dlBtn.style.display = "block";
+                dlBtn.innerText = "تحميل التطبيق";
+            }
+            var installBtn = box.querySelector(".btn-install");
+            if (installBtn) {
+                installBtn.classList.remove("is-ready");
+                installBtn.classList.add("is-not-ready");
+                installBtn.innerText = "لم يتم تثبت!";
+            }
+            updateStatusButton(box, "idle");
+        }
+
         function restoreBoxModes(root) {
             var scope = root || document;
             scope.querySelectorAll(".box[data-dl-key]").forEach(function (box) {
                 var boxKey = box.getAttribute("data-dl-key") || "";
+                if (!boxKey) {
+                    exitMode1(box);
+                    return;
+                }
                 var canInstall = false;
                 try {
                     if (window.Android && window.Android.isBoxReadyForInstall) {
-                        canInstall = !!window.Android.isBoxReadyForInstall(boxKey);
+                        canInstall = window.Android.isBoxReadyForInstall(boxKey) === true;
                     }
                 } catch (e) {
                     canInstall = false;
@@ -1086,6 +1109,9 @@
                     enterMode2(box, true);
                 } else if (saved === "2-noinstall") {
                     enterMode2(box, false);
+                } else {
+                    if (saved) saveBoxMode(boxKey, null);
+                    exitMode1(box);
                 }
             });
         }
@@ -1145,6 +1171,7 @@
             if (window.Android && window.Android.installBoxDownload) {
                 window.Android.installBoxDownload(boxKey);
             }
+            exitMode1(parentBox);
         }
 
         function applyProgressToBox(box, value) {
