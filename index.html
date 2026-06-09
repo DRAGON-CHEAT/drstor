@@ -369,20 +369,28 @@
 
         .dl-back-toast {
             position: fixed;
-            bottom: 28px;
+            bottom: 48px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 10000;
-            background: rgba(12, 22, 35, 0.95);
+            z-index: 2147483647;
+            background: rgba(12, 22, 35, 0.98);
             color: #fff;
-            border: 1px solid rgba(0, 180, 255, 0.45);
-            padding: 14px 28px;
-            border-radius: 12px;
-            font-size: calc(var(--btn-size) + 1px);
+            border: 2px solid rgba(0, 180, 255, 0.7);
+            padding: 18px 36px;
+            border-radius: 14px;
+            font-size: 22px;
             font-weight: 700;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
             display: none;
             pointer-events: none;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .dl-back-toast.show {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
         }
 
         @keyframes move {
@@ -862,6 +870,7 @@
                 el.innerText = "يوجد تطبيق قيد تحميل";
                 document.body.appendChild(el);
             }
+            el.classList.add("show");
             el.style.display = "block";
             el.style.visibility = "visible";
             el.style.opacity = "1";
@@ -869,6 +878,7 @@
                 clearTimeout(window._dlBackToastTimer);
             }
             window._dlBackToastTimer = setTimeout(function () {
+                el.classList.remove("show");
                 el.style.display = "none";
             }, 3500);
         };
@@ -1294,7 +1304,11 @@
                         }
                     } else {
                         window._storeBackWarnShown = true;
-                        showDownloadBackWarning();
+                        if (window.Android && window.Android.showDownloadBackWarning) {
+                            window.Android.showDownloadBackWarning();
+                        } else {
+                            showDownloadBackWarning();
+                        }
                     }
                     return;
                 }
