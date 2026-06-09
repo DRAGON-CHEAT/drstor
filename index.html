@@ -299,6 +299,30 @@
             margin-bottom: 0;
         }
 
+        .btn-status {
+            display: none;
+            background: #3a3f47;
+            font-size: calc(var(--btn-size) - 1px);
+            margin-bottom: 0;
+            width: 100%;
+        }
+
+        .btn-status.is-downloading {
+            display: block;
+            color: #ffd700;
+        }
+
+        .btn-status.is-ready {
+            display: block;
+            background: #1a3d1a;
+            color: #39ff14;
+        }
+
+        .btn-status.is-ready:focus {
+            background: #245a24;
+            outline: 2px solid #39ff14;
+        }
+
         .btn:focus {
             background: #0056b3;
             outline: 2px solid #fff;
@@ -365,32 +389,6 @@
             font-size: 12px;
             letter-spacing: 1px;
             font-weight: bold;
-        }
-
-        .dl-back-toast {
-            position: fixed;
-            bottom: 48px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 2147483647;
-            background: rgba(12, 22, 35, 0.98);
-            color: #fff;
-            border: 2px solid rgba(0, 180, 255, 0.7);
-            padding: 18px 36px;
-            border-radius: 14px;
-            font-size: 22px;
-            font-weight: 700;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-            display: none;
-            pointer-events: none;
-            text-align: center;
-            white-space: nowrap;
-        }
-
-        .dl-back-toast.show {
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
         }
 
         @keyframes move {
@@ -685,7 +683,7 @@
                         </div>
                         <div class="btn-group">
                             <button type="button" class="btn" onclick="startAction(this, 'https://github.com/DRAGON-CHEAT/web-view-upd/releases/download/1.3/Ads+Regex+4.0.apk')">تحميل التطبيق</button>
-                            <button type="button" class="btn btn-clean">عرض التفصيل</button>
+                            <button type="button" class="btn btn-clean btn-status"></button>
                             <div class="progress-container">
                                 <div class="timer-text">0%</div>
                                 <div class="progress-bar"></div>
@@ -698,7 +696,7 @@
                         </div>
                         <div class="btn-group">
                             <button type="button" class="btn" onclick="startAction(this, 'https://github.com/DRAGON-CHEAT/web-view-upd/releases/download/1.3/Ads+Regex+4.0.apk')">تحميل التطبيق</button>
-                            <button type="button" class="btn btn-clean">عرض التفصيل</button>
+                            <button type="button" class="btn btn-clean btn-status"></button>
                             <div class="progress-container">
                                 <div class="timer-text">0%</div>
                                 <div class="progress-bar"></div>
@@ -711,7 +709,7 @@
                         </div>
                         <div class="btn-group">
                             <button type="button" class="btn" onclick="startAction(this, 'https://github.com/DRAGON-CHEAT/web-view-upd/releases/download/1.3/Ads+Regex+4.0.apk')">تحميل التطبيق</button>
-                            <button type="button" class="btn btn-clean">عرض التفصيل</button>
+                            <button type="button" class="btn btn-clean btn-status"></button>
                             <div class="progress-container">
                                 <div class="timer-text">0%</div>
                                 <div class="progress-bar"></div>
@@ -724,7 +722,7 @@
                         </div>
                         <div class="btn-group">
                             <button type="button" class="btn" onclick="startAction(this, 'https://github.com/DRAGON-CHEAT/web-view-upd/releases/download/1.3/Ads+Regex+4.0.apk')">تحميل التطبيق</button>
-                            <button type="button" class="btn btn-clean">عرض التفصيل</button>
+                            <button type="button" class="btn btn-clean btn-status"></button>
                             <div class="progress-container">
                                 <div class="timer-text">0%</div>
                                 <div class="progress-bar"></div>
@@ -737,7 +735,7 @@
             </div>
             <div class="btn-group">
                             <button type="button" class="btn" onclick="startAction(this, 'https://github.com/DRAGON-CHEAT/web-view-upd/releases/download/1.3/Ads+Regex+4.0.apk')">تحميل التطبيق</button>
-                            <button type="button" class="btn btn-clean">عرض التفصيل</button>
+                            <button type="button" class="btn btn-clean btn-status"></button>
                 <div class="progress-container">
                     <div class="timer-text">0%</div>
                     <div class="progress-bar"></div>
@@ -750,7 +748,7 @@
             </div>
             <div class="btn-group">
                             <button type="button" class="btn" onclick="startAction(this, 'https://github.com/DRAGON-CHEAT/web-view-upd/releases/download/1.3/Ads+Regex+4.0.apk')">تحميل التطبيق</button>
-                            <button type="button" class="btn btn-clean">عرض التفصيل</button>
+                            <button type="button" class="btn btn-clean btn-status"></button>
                 <div class="progress-container">
                     <div class="timer-text">0%</div>
                     <div class="progress-bar"></div>
@@ -773,7 +771,7 @@
                         </div>
                         <div class="btn-group">
                             <button type="button" class="btn" onclick="startAction(this, 'https://github.com/DRAGON-CHEAT/test/releases/download/1.2/DraGon.IpTv_non.apk')">تحميل التطبيق</button>
-                            <button type="button" class="btn btn-clean">عرض التفصيل</button>
+                            <button type="button" class="btn btn-clean btn-status"></button>
                             <div class="progress-container">
                                 <div class="timer-text">0%</div>
                                 <div class="progress-bar"></div>
@@ -786,7 +784,7 @@
                         </div>
                         <div class="btn-group">
                             <button type="button" class="btn" onclick="startAction(this, 'https://github.com/DRAGON-CHEAT/test/releases/download/1.2/DraGon.IpTv_non.apk')">تحميل التطبيق</button>
-                            <button type="button" class="btn btn-clean">عرض التفصيل</button>
+                            <button type="button" class="btn btn-clean btn-status"></button>
                             <div class="progress-container">
                                 <div class="timer-text">0%</div>
                                 <div class="progress-bar"></div>
@@ -799,7 +797,7 @@
                         </div>
                         <div class="btn-group">
                             <button type="button" class="btn" onclick="startAction(this, 'https://github.com/DRAGON-CHEAT/test/releases/download/1.2/DraGon.IpTv_non.apk')">تحميل التطبيق</button>
-                            <button type="button" class="btn btn-clean">عرض التفصيل</button>
+                            <button type="button" class="btn btn-clean btn-status"></button>
                             <div class="progress-container">
                                 <div class="timer-text">0%</div>
                                 <div class="progress-bar"></div>
@@ -812,7 +810,7 @@
                         </div>
                         <div class="btn-group">
                             <button type="button" class="btn" onclick="startAction(this, 'https://github.com/DRAGON-CHEAT/test/releases/download/1.2/DraGon.IpTv_non.apk')">تحميل التطبيق</button>
-                            <button type="button" class="btn btn-clean">عرض التفصيل</button>
+                            <button type="button" class="btn btn-clean btn-status"></button>
                             <div class="progress-container">
                                 <div class="timer-text">0%</div>
                                 <div class="progress-bar"></div>
@@ -825,7 +823,7 @@
                         </div>
                         <div class="btn-group">
                             <button type="button" class="btn" onclick="startAction(this, 'https://github.com/DRAGON-CHEAT/test/releases/download/1.2/DraGon.IpTv_non.apk')">تحميل التطبيق</button>
-                            <button type="button" class="btn btn-clean">عرض التفصيل</button>
+                            <button type="button" class="btn btn-clean btn-status"></button>
                             <div class="progress-container">
                                 <div class="timer-text">0%</div>
                                 <div class="progress-bar"></div>
@@ -838,7 +836,7 @@
                         </div>
                         <div class="btn-group">
                             <button type="button" class="btn" onclick="startAction(this, 'https://github.com/DRAGON-CHEAT/test/releases/download/1.2/DraGon.IpTv_non.apk')">تحميل التطبيق</button>
-                            <button type="button" class="btn btn-clean">عرض التفصيل</button>
+                            <button type="button" class="btn btn-clean btn-status"></button>
                             <div class="progress-container">
                                 <div class="timer-text">0%</div>
                                 <div class="progress-bar"></div>
@@ -855,33 +853,9 @@
         <div class="footer">Build by DraGon Show™_2026</div>
     </div>
 
-    <div id="dl-back-toast" class="dl-back-toast" aria-live="polite">يوجد تطبيق قيد تحميل</div>
-
     <script>
         let progressPollers = new Map();
         let activeDownloadBox = null;
-
-        window.showDownloadBackWarning = function () {
-            var el = document.getElementById("dl-back-toast");
-            if (!el) {
-                el = document.createElement("div");
-                el.id = "dl-back-toast";
-                el.className = "dl-back-toast";
-                el.innerText = "يوجد تطبيق قيد تحميل";
-                document.body.appendChild(el);
-            }
-            el.classList.add("show");
-            el.style.display = "block";
-            el.style.visibility = "visible";
-            el.style.opacity = "1";
-            if (window._dlBackToastTimer) {
-                clearTimeout(window._dlBackToastTimer);
-            }
-            window._dlBackToastTimer = setTimeout(function () {
-                el.classList.remove("show");
-                el.style.display = "none";
-            }, 3500);
-        };
 
         var APP_BOX_IMAGES = {
             android: [
@@ -1040,8 +1014,65 @@
                             cancelAction(cancelBtn);
                         };
                     }
+                    var statusBtn = box.querySelector(".btn-status");
+                    if (statusBtn) {
+                        statusBtn.innerText = "";
+                        statusBtn.style.display = "none";
+                        statusBtn.classList.remove("is-downloading", "is-ready");
+                        statusBtn.onclick = function () {
+                            installAction(statusBtn);
+                        };
+                    }
                 });
             });
+        }
+
+        function updateStatusButton(box, state) {
+            var btn = box.querySelector(".btn-status");
+            if (!btn) return;
+            btn.classList.remove("is-downloading", "is-ready");
+            if (state === "downloading") {
+                btn.style.display = "block";
+                btn.classList.add("is-downloading");
+                btn.innerText = "تطبيق قيد تحميل";
+                box.classList.remove("box-ready-install");
+            } else if (state === "ready") {
+                btn.style.display = "block";
+                btn.classList.add("is-ready");
+                btn.innerText = "مكتمل تثبيت !";
+                box.classList.add("box-ready-install");
+                box.classList.remove("box-downloading");
+            } else {
+                btn.style.display = "none";
+                btn.innerText = "";
+                box.classList.remove("box-ready-install");
+            }
+        }
+
+        function installAction(btnElement) {
+            var parentBox = btnElement.closest(".box");
+            if (!parentBox || !parentBox.classList.contains("box-ready-install")) return;
+            var boxKey = parentBox.getAttribute("data-dl-key") || "";
+            if (window.Android && window.Android.installBoxDownload) {
+                window.Android.installBoxDownload(boxKey);
+            }
+            if (progressPollers.has(parentBox)) {
+                clearInterval(progressPollers.get(parentBox));
+                progressPollers.delete(parentBox);
+            }
+            var progressCont = parentBox.querySelector(".progress-container");
+            var progressBar = parentBox.querySelector(".progress-bar");
+            var progressLabel = parentBox.querySelector(".timer-text");
+            var dlBtn = parentBox.querySelector(".btn-dl");
+            if (progressCont) progressCont.style.display = "none";
+            if (progressBar) progressBar.style.width = "0%";
+            if (progressLabel) progressLabel.innerText = "0%";
+            if (dlBtn) dlBtn.innerText = "تحميل التطبيق";
+            parentBox.removeAttribute("data-dl-progress");
+            updateStatusButton(parentBox, "idle");
+            if (activeDownloadBox === parentBox) {
+                activeDownloadBox = null;
+            }
         }
 
         function applyProgressToBox(box, value) {
@@ -1055,6 +1086,11 @@
             if (progressCont) progressCont.style.display = "block";
             if (progressBar) progressBar.style.width = value + "%";
             if (progressLabel) progressLabel.innerText = value + "%";
+            if (value >= 100) {
+                updateStatusButton(box, "ready");
+            } else if (value > 0 || box.classList.contains("box-downloading")) {
+                updateStatusButton(box, "downloading");
+            }
         }
 
         window.setDownloadProgress = function (percent, boxKey) {
@@ -1292,25 +1328,6 @@
                 if (tvInsideBox) {
                     exitTvBox();
                     e.preventDefault();
-                    return;
-                }
-                if (document.querySelector(".box.box-downloading")) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    if (window._storeBackWarnShown) {
-                        window._storeBackWarnShown = false;
-                        if (window.Android && window.Android.finishStoreActivity) {
-                            window.Android.finishStoreActivity();
-                        }
-                    } else {
-                        window._storeBackWarnShown = true;
-                        if (window.Android && window.Android.showDownloadBackWarning) {
-                            window.Android.showDownloadBackWarning();
-                        } else {
-                            showDownloadBackWarning();
-                        }
-                    }
-                    return;
                 }
                 return;
             }
@@ -1407,10 +1424,11 @@
             if (progressLabel) progressLabel.innerText = "0%";
             if (dlBtn) dlBtn.innerText = "تحميل التطبيق";
 
+            updateStatusButton(parentBox, "idle");
+
             if (activeDownloadBox === parentBox) {
                 activeDownloadBox = null;
             }
-            window._storeBackWarnShown = false;
 
             if (window.Android && window.Android.cancelBoxDownload) {
                 window.Android.cancelBoxDownload(boxKey);
@@ -1430,13 +1448,13 @@
 
             parentBox.classList.add("box-downloading");
             activeDownloadBox = parentBox;
-            window._storeBackWarnShown = false;
 
             progressCont.style.display = "block";
             btnElement.innerText = "إعادة التحميل !";
             if (progressBar) progressBar.style.width = "0%";
             if (progressLabel) progressLabel.innerText = "0%";
             parentBox.setAttribute("data-dl-progress", "0");
+            updateStatusButton(parentBox, "downloading");
 
             if (window.Android && window.Android.triggerDownload) {
                 var boxKey = parentBox.getAttribute("data-dl-key") || "";
