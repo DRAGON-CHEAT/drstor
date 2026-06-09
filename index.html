@@ -299,6 +299,16 @@
             margin-bottom: 0;
         }
 
+        .btn-details {
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        .box-downloading .btn-details,
+        .box-mode-2 .btn-details {
+            display: none !important;
+        }
+
         .btn-status {
             display: none;
             background: #3a3f47;
@@ -1012,9 +1022,17 @@
                     if (titleEl && sectionNames[index]) {
                         titleEl.textContent = sectionNames[index];
                     }
-                    var downloadBtn = box.querySelector(".btn-group .btn-dl, .btn-group .btn:not(.btn-clean):not(.btn-cache):not(.btn-install):not(.btn-status)");
+                    var downloadBtn = box.querySelector(".btn-group .btn-dl, .btn-group .btn:not(.btn-clean):not(.btn-cache):not(.btn-install):not(.btn-status):not(.btn-details)");
                     if (downloadBtn) {
                         downloadBtn.classList.add("btn-dl");
+                    }
+                    var detailsBtn = box.querySelector(".btn-details");
+                    if (!detailsBtn && downloadBtn) {
+                        detailsBtn = document.createElement("button");
+                        detailsBtn.type = "button";
+                        detailsBtn.className = "btn btn-clean btn-details";
+                        detailsBtn.innerText = "عرض التفصيل";
+                        downloadBtn.insertAdjacentElement("afterend", detailsBtn);
                     }
                     if (downloadBtn && sectionLinks[index]) {
                         (function (btn, link) {
@@ -1176,7 +1194,6 @@
             if (window.Android && window.Android.installBoxDownload) {
                 window.Android.installBoxDownload(boxKey);
             }
-            exitMode1(parentBox);
         }
 
         function applyProgressToBox(box, value) {
@@ -1526,8 +1543,7 @@
                 window.Android.cancelBoxDownload(boxKey);
             }
 
-            parentBox.removeAttribute("data-dl-progress");
-            enterMode2(parentBox, false);
+            exitMode1(parentBox);
         }
 
         function startAction(btnElement, url) {
