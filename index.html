@@ -348,7 +348,7 @@
 
         .box-mode-2 .mode-2-row {
             display: flex !important;
-            margin-top: 44px;
+            margin-top: 0;
         }
 
         .btn-cache {
@@ -1114,9 +1114,8 @@
             }
         }
 
-        function exitMode1(box) {
+        function resetBoxVisual(box) {
             if (!box) return;
-            var boxKey = box.getAttribute("data-dl-key") || "";
             box.classList.remove("box-mode-2", "box-ready-install", "box-no-install", "box-downloading");
             box.removeAttribute("data-dl-progress");
             var dlBtn = box.querySelector(".btn-dl");
@@ -1131,6 +1130,12 @@
             if (progressBar) progressBar.style.width = "0%";
             if (progressLabel) progressLabel.innerText = "0%";
             updateStatusButton(box, "idle");
+        }
+
+        function exitMode1(box) {
+            if (!box) return;
+            var boxKey = box.getAttribute("data-dl-key") || "";
+            resetBoxVisual(box);
             if (boxKey) saveBoxMode(boxKey, null);
         }
 
@@ -1138,22 +1143,21 @@
             var scope = root || document;
             var readyKeys = getReadyBoxKeys();
             scope.querySelectorAll(".box[data-dl-key]").forEach(function (box) {
-                exitMode1(box);
+                resetBoxVisual(box);
             });
             scope.querySelectorAll(".box[data-dl-key]").forEach(function (box) {
                 var boxKey = box.getAttribute("data-dl-key") || "";
                 if (!boxKey) return;
-                if (readyKeys.indexOf(boxKey) >= 0) {
-                    enterMode2(box, true);
-                    return;
-                }
                 var saved = "";
                 try { saved = localStorage.getItem("dlmode_" + boxKey) || ""; } catch (e) {}
-                if (saved === "2-noinstall") {
+                if (readyKeys.indexOf(boxKey) >= 0 || saved === "2-ready") {
+                    enterMode2(box, true);
+                } else if (saved === "2-noinstall") {
                     enterMode2(box, false);
                 }
             });
         }
+        window.restoreBoxModes = restoreBoxModes;
 
         function enterMode2(box, canInstall) {
             if (!box) return;
