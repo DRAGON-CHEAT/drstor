@@ -326,18 +326,18 @@
         .btn-dl { width: 100%; }
 
         .mode-2-row {
-            display: none;
+            display: none !important;
             width: 100%;
             gap: 6px;
             margin-bottom: 8px;
         }
 
         .box-mode-2 .btn-dl {
-            display: none;
+            display: none !important;
         }
 
         .box-mode-2 .mode-2-row {
-            display: flex;
+            display: flex !important;
         }
 
         .btn-cache {
@@ -1062,56 +1062,61 @@
         }
 
         function saveBoxMode(boxKey, mode) {
+            if (!boxKey) return;
             try {
                 if (mode) localStorage.setItem("dlmode_" + boxKey, mode);
                 else localStorage.removeItem("dlmode_" + boxKey);
             } catch (e) {}
         }
 
+        function getReadyBoxKeys() {
+            if (!window.Android || !window.Android.getReadyBoxKeysJson) return [];
+            try {
+                var raw = window.Android.getReadyBoxKeysJson();
+                var keys = JSON.parse(raw || "[]");
+                return Array.isArray(keys) ? keys : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
         function exitMode1(box) {
             if (!box) return;
             var boxKey = box.getAttribute("data-dl-key") || "";
             box.classList.remove("box-mode-2", "box-ready-install", "box-no-install", "box-downloading");
-            saveBoxMode(boxKey, null);
+            box.removeAttribute("data-dl-progress");
             var dlBtn = box.querySelector(".btn-dl");
             if (dlBtn) {
-                dlBtn.style.display = "block";
+                dlBtn.style.display = "";
                 dlBtn.innerText = "تحميل التطبيق";
             }
-            var installBtn = box.querySelector(".btn-install");
-            if (installBtn) {
-                installBtn.classList.remove("is-ready");
-                installBtn.classList.add("is-not-ready");
-                installBtn.innerText = "لم يتم تثبت!";
-            }
+            var progressCont = box.querySelector(".progress-container");
+            var progressBar = box.querySelector(".progress-bar");
+            var progressLabel = box.querySelector(".timer-text");
+            if (progressCont) progressCont.style.display = "none";
+            if (progressBar) progressBar.style.width = "0%";
+            if (progressLabel) progressLabel.innerText = "0%";
             updateStatusButton(box, "idle");
+            if (boxKey) saveBoxMode(boxKey, null);
         }
 
         function restoreBoxModes(root) {
             var scope = root || document;
+            var readyKeys = getReadyBoxKeys();
+            scope.querySelectorAll(".box[data-dl-key]").forEach(function (box) {
+                exitMode1(box);
+            });
             scope.querySelectorAll(".box[data-dl-key]").forEach(function (box) {
                 var boxKey = box.getAttribute("data-dl-key") || "";
-                if (!boxKey) {
-                    exitMode1(box);
+                if (!boxKey) return;
+                if (readyKeys.indexOf(boxKey) >= 0) {
+                    enterMode2(box, true);
                     return;
-                }
-                var canInstall = false;
-                try {
-                    if (window.Android && window.Android.isBoxReadyForInstall) {
-                        canInstall = window.Android.isBoxReadyForInstall(boxKey) === true;
-                    }
-                } catch (e) {
-                    canInstall = false;
                 }
                 var saved = "";
                 try { saved = localStorage.getItem("dlmode_" + boxKey) || ""; } catch (e) {}
-                if (canInstall) {
-                    enterMode2(box, true);
-                } else if (saved === "2-noinstall") {
+                if (saved === "2-noinstall") {
                     enterMode2(box, false);
-                } else {
-                    if (saved) saveBoxMode(boxKey, null);
-                    exitMode1(box);
                 }
             });
         }
@@ -1303,7 +1308,12 @@
 
             gameGroup.innerHTML = appsGroup.innerHTML;
 
+            gameGroup.querySelectorAll(".box").forEach(function (box) {
+                box.classList.remove("box-mode-2", "box-ready-install", "box-no-install", "box-downloading");
+            });
+
             applyBoxMeta(gameGroup, "game");
+            restoreBoxModes(gameGroup);
 
             gameGroup.querySelectorAll(".box").forEach(function (box) {
                 box.tabIndex = -1;
