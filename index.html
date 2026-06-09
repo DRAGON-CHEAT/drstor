@@ -312,15 +312,8 @@
             color: #ffd700;
         }
 
-        .btn-status.is-ready {
-            display: block;
-            background: #1a3d1a;
-            color: #39ff14;
-        }
-
-        .btn-status.is-ready:focus {
-            background: #245a24;
-            outline: 2px solid #39ff14;
+        .box-mode-2 .btn-status {
+            display: none !important;
         }
 
         .btn:focus {
@@ -330,25 +323,54 @@
 
         .btn-clean:focus { background: #555b65; }
 
-        .btn-cancel {
+        .btn-dl { width: 100%; }
+
+        .mode-2-row {
             display: none;
-            background: #8b2e2e;
-            color: #fff;
-            width: calc(50% - 3px);
+            width: 100%;
+            gap: 6px;
             margin-bottom: 8px;
         }
 
-        .btn-dl { width: 100%; }
+        .box-mode-2 .btn-dl {
+            display: none;
+        }
 
-        .box-downloading .btn-dl {
+        .box-mode-2 .mode-2-row {
+            display: flex;
+        }
+
+        .btn-cache {
+            background: #8b2e2e;
+            color: #fff;
             width: calc(50% - 3px);
+            margin-bottom: 0;
         }
 
-        .box-downloading .btn-cancel {
-            display: inline-block;
+        .btn-cache:focus { background: #a83232; }
+
+        .btn-install {
+            background: #3a3f47;
+            color: #aaa;
+            width: calc(50% - 3px);
+            margin-bottom: 0;
+            font-size: calc(var(--btn-size) - 1px);
         }
 
-        .btn-cancel:focus { background: #a83232; }
+        .btn-install.is-ready {
+            background: #1a3d1a;
+            color: #39ff14;
+        }
+
+        .btn-install.is-ready:focus {
+            background: #245a24;
+            outline: 2px solid #39ff14;
+        }
+
+        .btn-install.is-not-ready {
+            background: #3a3f47;
+            color: #aaa;
+        }
 
         .progress-container {
             width: 100%;
@@ -435,11 +457,11 @@
             box-shadow: 0 0 18px rgba(40, 167, 69, 0.4);
         }
 
-        #group-game .btn:not(.btn-clean) {
+        #group-game .btn:not(.btn-clean):not(.btn-cache):not(.btn-install) {
             background: #28a745;
         }
 
-        #group-game .btn:not(.btn-clean):focus {
+        #group-game .btn:not(.btn-clean):not(.btn-cache):not(.btn-install):focus {
             background: #1e7e34;
         }
 
@@ -566,7 +588,7 @@
                 box-shadow: inset 0 0 0 2px #fff;
             }
 
-            #group-game .btn:not(.btn-clean):focus {
+            #group-game .btn:not(.btn-clean):not(.btn-cache):not(.btn-install):focus {
                 outline: none;
                 box-shadow: inset 0 0 0 2px #fff;
             }
@@ -990,7 +1012,7 @@
                     if (titleEl && sectionNames[index]) {
                         titleEl.textContent = sectionNames[index];
                     }
-                    var downloadBtn = box.querySelector(".btn-group .btn:not(.btn-clean):not(.btn-cancel)");
+                    var downloadBtn = box.querySelector(".btn-group .btn-dl, .btn-group .btn:not(.btn-clean):not(.btn-cache):not(.btn-install):not(.btn-status)");
                     if (downloadBtn) {
                         downloadBtn.classList.add("btn-dl");
                     }
@@ -1001,51 +1023,115 @@
                             };
                         })(downloadBtn, sectionLinks[index]);
                     }
-                    var cancelBtn = box.querySelector(".btn-cancel");
-                    if (!cancelBtn && downloadBtn) {
-                        cancelBtn = document.createElement("button");
-                        cancelBtn.type = "button";
-                        cancelBtn.className = "btn btn-cancel";
-                        cancelBtn.innerText = "الغاء التحميل";
-                        downloadBtn.insertAdjacentElement("afterend", cancelBtn);
+                    var mode2Row = box.querySelector(".mode-2-row");
+                    if (!mode2Row && downloadBtn) {
+                        mode2Row = document.createElement("div");
+                        mode2Row.className = "mode-2-row";
+                        var cacheBtn = document.createElement("button");
+                        cacheBtn.type = "button";
+                        cacheBtn.className = "btn btn-cache";
+                        cacheBtn.innerText = "حذف الكاش";
+                        var installBtn = document.createElement("button");
+                        installBtn.type = "button";
+                        installBtn.className = "btn btn-install is-not-ready";
+                        installBtn.innerText = "لم يتم تثبت!";
+                        mode2Row.appendChild(cacheBtn);
+                        mode2Row.appendChild(installBtn);
+                        downloadBtn.insertAdjacentElement("afterend", mode2Row);
                     }
-                    if (cancelBtn) {
-                        cancelBtn.onclick = function () {
-                            cancelAction(cancelBtn);
+                    var cacheBtn = box.querySelector(".btn-cache");
+                    if (cacheBtn) {
+                        cacheBtn.onclick = function () {
+                            cacheDeleteAction(cacheBtn);
+                        };
+                    }
+                    var installBtn = box.querySelector(".btn-install");
+                    if (installBtn) {
+                        installBtn.onclick = function () {
+                            installAction(installBtn);
                         };
                     }
                     var statusBtn = box.querySelector(".btn-status");
                     if (statusBtn) {
                         statusBtn.innerText = "";
                         statusBtn.style.display = "none";
-                        statusBtn.classList.remove("is-downloading", "is-ready");
-                        statusBtn.onclick = function () {
-                            installAction(statusBtn);
-                        };
+                        statusBtn.classList.remove("is-downloading");
                     }
                 });
             });
+            restoreBoxModes(root);
+        }
+
+        function saveBoxMode(boxKey, mode) {
+            try {
+                if (mode) localStorage.setItem("dlmode_" + boxKey, mode);
+                else localStorage.removeItem("dlmode_" + boxKey);
+            } catch (e) {}
+        }
+
+        function restoreBoxModes(root) {
+            var scope = root || document;
+            scope.querySelectorAll(".box[data-dl-key]").forEach(function (box) {
+                var boxKey = box.getAttribute("data-dl-key") || "";
+                var canInstall = false;
+                if (window.Android && window.Android.isBoxReadyForInstall) {
+                    canInstall = !!window.Android.isBoxReadyForInstall(boxKey);
+                }
+                var saved = "";
+                try { saved = localStorage.getItem("dlmode_" + boxKey) || ""; } catch (e) {}
+                if (canInstall) {
+                    enterMode2(box, true);
+                } else if (saved === "2-noinstall") {
+                    enterMode2(box, false);
+                }
+            });
+        }
+
+        function enterMode2(box, canInstall) {
+            if (!box) return;
+            var boxKey = box.getAttribute("data-dl-key") || "";
+            box.classList.remove("box-downloading");
+            box.classList.add("box-mode-2");
+            if (progressPollers.has(box)) {
+                clearInterval(progressPollers.get(box));
+                progressPollers.delete(box);
+            }
+            if (activeDownloadBox === box) activeDownloadBox = null;
+            var progressCont = box.querySelector(".progress-container");
+            var progressBar = box.querySelector(".progress-bar");
+            var progressLabel = box.querySelector(".timer-text");
+            if (progressCont) progressCont.style.display = "none";
+            if (progressBar) progressBar.style.width = "0%";
+            if (progressLabel) progressLabel.innerText = "0%";
+            var installBtn = box.querySelector(".btn-install");
+            if (installBtn) {
+                installBtn.innerText = canInstall ? "تثبيت الان" : "لم يتم تثبت!";
+                installBtn.classList.toggle("is-ready", canInstall);
+                installBtn.classList.toggle("is-not-ready", !canInstall);
+            }
+            if (canInstall) {
+                box.classList.add("box-ready-install");
+                box.classList.remove("box-no-install");
+                saveBoxMode(boxKey, "2-ready");
+            } else {
+                box.classList.remove("box-ready-install");
+                box.classList.add("box-no-install");
+                saveBoxMode(boxKey, "2-noinstall");
+            }
+            updateStatusButton(box, "idle");
         }
 
         function updateStatusButton(box, state) {
             var btn = box.querySelector(".btn-status");
-            if (!btn) return;
-            btn.classList.remove("is-downloading", "is-ready");
+            if (!btn || box.classList.contains("box-mode-2")) return;
+            btn.classList.remove("is-downloading");
             if (state === "downloading") {
                 btn.style.display = "block";
                 btn.classList.add("is-downloading");
                 btn.innerText = "تطبيق قيد تحميل";
-                box.classList.remove("box-ready-install");
-            } else if (state === "ready") {
-                btn.style.display = "block";
-                btn.classList.add("is-ready");
-                btn.innerText = "مكتمل تثبيت !";
-                box.classList.add("box-ready-install");
-                box.classList.remove("box-downloading");
             } else {
                 btn.style.display = "none";
                 btn.innerText = "";
-                box.classList.remove("box-ready-install");
             }
         }
 
@@ -1055,23 +1141,6 @@
             var boxKey = parentBox.getAttribute("data-dl-key") || "";
             if (window.Android && window.Android.installBoxDownload) {
                 window.Android.installBoxDownload(boxKey);
-            }
-            if (progressPollers.has(parentBox)) {
-                clearInterval(progressPollers.get(parentBox));
-                progressPollers.delete(parentBox);
-            }
-            var progressCont = parentBox.querySelector(".progress-container");
-            var progressBar = parentBox.querySelector(".progress-bar");
-            var progressLabel = parentBox.querySelector(".timer-text");
-            var dlBtn = parentBox.querySelector(".btn-dl");
-            if (progressCont) progressCont.style.display = "none";
-            if (progressBar) progressBar.style.width = "0%";
-            if (progressLabel) progressLabel.innerText = "0%";
-            if (dlBtn) dlBtn.innerText = "تحميل التطبيق";
-            parentBox.removeAttribute("data-dl-progress");
-            updateStatusButton(parentBox, "idle");
-            if (activeDownloadBox === parentBox) {
-                activeDownloadBox = null;
             }
         }
 
@@ -1087,7 +1156,7 @@
             if (progressBar) progressBar.style.width = value + "%";
             if (progressLabel) progressLabel.innerText = value + "%";
             if (value >= 100) {
-                updateStatusButton(box, "ready");
+                enterMode2(box, true);
             } else if (value > 0 || box.classList.contains("box-downloading")) {
                 updateStatusButton(box, "downloading");
             }
@@ -1109,6 +1178,10 @@
                 box = document.querySelector(".box.box-downloading");
             }
             if (!box) return;
+            if (value >= 100) {
+                applyProgressToBox(box, value);
+                return;
+            }
             if (!box.classList.contains("box-downloading")) return;
             applyProgressToBox(box, value);
         };
@@ -1401,38 +1474,17 @@
             }
         }
 
-        function cancelAction(btnElement) {
+        function cacheDeleteAction(btnElement) {
             var parentBox = btnElement.closest(".box");
             if (!parentBox) return;
             var boxKey = parentBox.getAttribute("data-dl-key") || "";
 
-            if (progressPollers.has(parentBox)) {
-                clearInterval(progressPollers.get(parentBox));
-                progressPollers.delete(parentBox);
-            }
-
-            parentBox.classList.remove("box-downloading");
-            parentBox.removeAttribute("data-dl-progress");
-
-            var progressCont = parentBox.querySelector(".progress-container");
-            var progressBar = parentBox.querySelector(".progress-bar");
-            var progressLabel = parentBox.querySelector(".timer-text");
-            var dlBtn = parentBox.querySelector(".btn-dl");
-
-            if (progressCont) progressCont.style.display = "none";
-            if (progressBar) progressBar.style.width = "0%";
-            if (progressLabel) progressLabel.innerText = "0%";
-            if (dlBtn) dlBtn.innerText = "تحميل التطبيق";
-
-            updateStatusButton(parentBox, "idle");
-
-            if (activeDownloadBox === parentBox) {
-                activeDownloadBox = null;
-            }
-
             if (window.Android && window.Android.cancelBoxDownload) {
                 window.Android.cancelBoxDownload(boxKey);
             }
+
+            parentBox.removeAttribute("data-dl-progress");
+            enterMode2(parentBox, false);
         }
 
         function startAction(btnElement, url) {
@@ -1446,6 +1498,9 @@
                 progressPollers.delete(parentBox);
             }
 
+            var boxKey = parentBox.getAttribute("data-dl-key") || "";
+            parentBox.classList.remove("box-mode-2", "box-ready-install", "box-no-install");
+            saveBoxMode(boxKey, null);
             parentBox.classList.add("box-downloading");
             activeDownloadBox = parentBox;
 
@@ -1457,7 +1512,6 @@
             updateStatusButton(parentBox, "downloading");
 
             if (window.Android && window.Android.triggerDownload) {
-                var boxKey = parentBox.getAttribute("data-dl-key") || "";
                 window.Android.triggerDownload(url, boxKey);
                 var pollFn = window.Android.getDownloadProgressForBox || window.Android.getDownloadProgress;
                 if (pollFn) {
@@ -1476,7 +1530,7 @@
 
         function resetBox(boxElement) {
             document.querySelectorAll(".box").forEach(function (box) {
-                if (box !== boxElement && !box.classList.contains("box-downloading")) {
+                if (box !== boxElement && !box.classList.contains("box-downloading") && !box.classList.contains("box-mode-2")) {
                     var progressCont = box.querySelector(".progress-container");
                     var btn = box.querySelector(".btn");
                     var progressLabel = box.querySelector(".timer-text");
@@ -1537,6 +1591,7 @@
         window.addEventListener("load", function () {
             applyBoxMeta(document.getElementById("group-apps"), "apps");
             initGameGroup();
+            restoreBoxModes(document);
             setupTvFocusables();
             updateGroupFocusability();
             updateTvSectionHeads();
