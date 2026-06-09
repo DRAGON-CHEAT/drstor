@@ -348,6 +348,7 @@
 
         .box-mode-2 .mode-2-row {
             display: flex !important;
+            margin-top: 44px;
         }
 
         .btn-cache {
@@ -357,7 +358,11 @@
             margin-bottom: 0;
         }
 
-        .btn-cache:focus { background: #a83232; }
+        .btn-cache:focus {
+            background: #a83232;
+            outline: none;
+            box-shadow: 0 0 0 2px #fff;
+        }
 
         .btn-install {
             background: #3a3f47;
@@ -374,7 +379,8 @@
 
         .btn-install.is-ready:focus {
             background: #245a24;
-            outline: 2px solid #39ff14;
+            outline: none;
+            box-shadow: 0 0 0 2px #39ff14;
         }
 
         .btn-install.is-not-ready {
@@ -596,6 +602,16 @@
             .btn-clean:focus {
                 outline: none;
                 box-shadow: inset 0 0 0 2px #fff;
+            }
+
+            .btn-install.is-ready:focus {
+                outline: none;
+                box-shadow: 0 0 0 2px #39ff14;
+            }
+
+            .btn-cache:focus {
+                outline: none;
+                box-shadow: 0 0 0 2px #fff;
             }
 
             #group-game .btn:not(.btn-clean):not(.btn-cache):not(.btn-install):focus {
