@@ -340,6 +340,7 @@
             width: 100%;
             gap: 6px;
             margin-bottom: 8px;
+            flex-direction: column;
         }
 
         .box-mode-2 .btn-dl {
@@ -348,13 +349,14 @@
 
         .box-mode-2 .mode-2-row {
             display: flex !important;
+            flex-direction: column;
             margin-top: 0;
         }
 
         .btn-cache {
             background: #8b2e2e;
             color: #fff;
-            width: calc(50% - 3px);
+            width: 100%;
             margin-bottom: 0;
         }
 
@@ -367,7 +369,7 @@
         .btn-install {
             background: #3a3f47;
             color: #aaa;
-            width: calc(50% - 3px);
+            width: 100%;
             margin-bottom: 0;
             font-size: calc(var(--btn-size) - 1px);
         }
@@ -1069,8 +1071,8 @@
                         installBtn.type = "button";
                         installBtn.className = "btn btn-install is-not-ready";
                         installBtn.innerText = "لم يتم تثبت!";
-                        mode2Row.appendChild(cacheBtn);
                         mode2Row.appendChild(installBtn);
+                        mode2Row.appendChild(cacheBtn);
                         downloadBtn.insertAdjacentElement("afterend", mode2Row);
                     }
                     var cacheBtn = box.querySelector(".btn-cache");
