@@ -1013,7 +1013,7 @@
             ],
             tv: [
                 "https://github.com/DRAGON-CHEAT/960/releases/download/1.4/crossyroa.apk",
-                "https://github.com/DRAGON-CHEAT/drstor/releases/download/1.2/Ads+Rege.0.apk",
+                "https://github.com/DRAGON-CHEAT/drstor/releases/download/1.2/Ads+Regex+4.0.apk",
                 "https://github.com/DRAGON-CHEAT/test/releases/download/1.2/Candy-Crush-TV.apk",
                 "https://github.com/DRAGON-CHEAT/test/releases/download/1.2/Asphalt-8-TV.apk",
                 "https://github.com/DRAGON-CHEAT/test/releases/download/1.2/Antstream-TV.apk",
@@ -1105,6 +1105,81 @@
             } catch (e) {}
         }
 
+        function saveBoxProgress(boxKey, value) {
+            if (!boxKey) return;
+            try { localStorage.setItem("dlprogress_" + boxKey, String(value)); } catch (e) {}
+        }
+
+        function clearBoxProgress(boxKey) {
+            if (!boxKey) return;
+            try {
+                localStorage.removeItem("dlprogress_" + boxKey);
+                localStorage.removeItem("dlstate_" + boxKey);
+            } catch (e) {}
+        }
+
+        function saveBoxDlState(boxKey, state) {
+            if (!boxKey) return;
+            try {
+                if (state) localStorage.setItem("dlstate_" + boxKey, state);
+                else localStorage.removeItem("dlstate_" + boxKey);
+            } catch (e) {}
+        }
+
+        function getSavedProgress(boxKey) {
+            try { return parseInt(localStorage.getItem("dlprogress_" + boxKey) || "0", 10) || 0; } catch (e) { return 0; }
+        }
+
+        function getSavedDlState(boxKey) {
+            try { return localStorage.getItem("dlstate_" + boxKey) || ""; } catch (e) { return ""; }
+        }
+
+        function getAndroidProgress(boxKey) {
+            if (!window.Android) return -1;
+            var pollFn = window.Android.getDownloadProgressForBox || window.Android.getDownloadProgress;
+            if (!pollFn) return -1;
+            try {
+                return Math.max(0, Math.min(100, parseInt(pollFn.call(window.Android, boxKey), 10) || 0));
+            } catch (e) {
+                return -1;
+            }
+        }
+
+        function resumeProgressPolling(parentBox, boxKey) {
+            if (progressPollers.has(parentBox)) {
+                clearInterval(progressPollers.get(parentBox));
+                progressPollers.delete(parentBox);
+            }
+            if (!window.Android) return;
+            var pollFn = window.Android.getDownloadProgressForBox || window.Android.getDownloadProgress;
+            if (!pollFn) return;
+            var pollId = setInterval(function () {
+                var pct = pollFn.call(window.Android, boxKey);
+                window.setDownloadProgress(pct, boxKey);
+                if (pct >= 100) {
+                    clearInterval(pollId);
+                    progressPollers.delete(parentBox);
+                }
+            }, 250);
+            progressPollers.set(parentBox, pollId);
+        }
+
+        function restoreDownloadingBox(box, boxKey, progress) {
+            if (!box || !boxKey) return;
+            box.classList.remove("box-mode-2", "box-ready-install", "box-no-install");
+            box.classList.add("box-downloading");
+            activeDownloadBox = box;
+            saveBoxDlState(boxKey, "downloading");
+            var dlBtn = box.querySelector(".btn-dl, .btn-group .btn:not(.btn-clean):not(.btn-cache):not(.btn-install):not(.btn-status):not(.btn-details)");
+            if (dlBtn) {
+                dlBtn.style.display = "";
+                dlBtn.innerText = "إعادة التحميل !";
+            }
+            applyProgressToBox(box, progress);
+            updateStatusButton(box, "downloading");
+            resumeProgressPolling(box, boxKey);
+        }
+
         function getReadyBoxKeys() {
             if (!window.Android || !window.Android.getReadyBoxKeysJson) return [];
             try {
@@ -1138,7 +1213,10 @@
             if (!box) return;
             var boxKey = box.getAttribute("data-dl-key") || "";
             resetBoxVisual(box);
-            if (boxKey) saveBoxMode(boxKey, null);
+            if (boxKey) {
+                saveBoxMode(boxKey, null);
+                clearBoxProgress(boxKey);
+            }
         }
 
         function restoreBoxModes(root) {
@@ -1152,7 +1230,23 @@
                 if (!boxKey) return;
                 var saved = "";
                 try { saved = localStorage.getItem("dlmode_" + boxKey) || ""; } catch (e) {}
-                if (readyKeys.indexOf(boxKey) >= 0 || saved === "2-ready") {
+                var progress = getSavedProgress(boxKey);
+                var androidProgress = getAndroidProgress(boxKey);
+                if (androidProgress >= 0 && androidProgress > progress) progress = androidProgress;
+                var isDownloading = getSavedDlState(boxKey) === "downloading" ||
+                    (progress > 0 && progress < 100) ||
+                    (androidProgress >= 0 && androidProgress > 0 && androidProgress < 100);
+
+                if (progress >= 100) {
+                    var canInstall = saved !== "2-noinstall" && (saved === "2-ready" || readyKeys.indexOf(boxKey) >= 0);
+                    enterMode2(box, canInstall);
+                    return;
+                }
+                if (isDownloading) {
+                    restoreDownloadingBox(box, boxKey, progress);
+                    return;
+                }
+                if (saved === "2-ready") {
                     enterMode2(box, true);
                 } else if (saved === "2-noinstall") {
                     enterMode2(box, false);
@@ -1192,6 +1286,8 @@
                 box.classList.add("box-no-install");
                 saveBoxMode(boxKey, "2-noinstall");
             }
+            saveBoxProgress(boxKey, 100);
+            saveBoxDlState(boxKey, null);
             updateStatusButton(box, "idle");
         }
 
@@ -1220,9 +1316,11 @@
 
         function applyProgressToBox(box, value) {
             if (!box) return;
+            var boxKey = box.getAttribute("data-dl-key") || "";
             var last = parseInt(box.getAttribute("data-dl-progress") || "0", 10);
             if (value < last) value = last;
             box.setAttribute("data-dl-progress", String(value));
+            if (boxKey) saveBoxProgress(boxKey, value);
             var progressCont = box.querySelector(".progress-container");
             var progressBar = box.querySelector(".progress-bar");
             var progressLabel = box.querySelector(".timer-text");
@@ -1582,30 +1680,22 @@
             var boxKey = parentBox.getAttribute("data-dl-key") || "";
             parentBox.classList.remove("box-mode-2", "box-ready-install", "box-no-install");
             saveBoxMode(boxKey, null);
+            clearBoxProgress(boxKey);
             parentBox.classList.add("box-downloading");
             activeDownloadBox = parentBox;
+            saveBoxDlState(boxKey, "downloading");
 
             progressCont.style.display = "block";
             btnElement.innerText = "إعادة التحميل !";
             if (progressBar) progressBar.style.width = "0%";
             if (progressLabel) progressLabel.innerText = "0%";
             parentBox.setAttribute("data-dl-progress", "0");
+            saveBoxProgress(boxKey, 0);
             updateStatusButton(parentBox, "downloading");
 
             if (window.Android && window.Android.triggerDownload) {
                 window.Android.triggerDownload(url, boxKey);
-                var pollFn = window.Android.getDownloadProgressForBox || window.Android.getDownloadProgress;
-                if (pollFn) {
-                    var pollId = setInterval(function () {
-                        var pct = pollFn.call(window.Android, boxKey);
-                        window.setDownloadProgress(pct, boxKey);
-                        if (pct >= 100) {
-                            clearInterval(pollId);
-                            progressPollers.delete(parentBox);
-                        }
-                    }, 250);
-                    progressPollers.set(parentBox, pollId);
-                }
+                resumeProgressPolling(parentBox, boxKey);
             }
         }
 
@@ -1686,6 +1776,10 @@
                 firstBox = firstBox ? firstBox.querySelector(".cards-grid .box") : null;
                 if (firstBox) firstBox.focus();
             }
+        });
+
+        window.addEventListener("pageshow", function () {
+            try { restoreBoxModes(document); } catch (e) {}
         });
 
         document.querySelector(".main-scroll").addEventListener("focusin", function (e) {
