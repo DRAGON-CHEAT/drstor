@@ -1230,6 +1230,16 @@
                 if (!boxKey) return;
                 var saved = "";
                 try { saved = localStorage.getItem("dlmode_" + boxKey) || ""; } catch (e) {}
+
+                if (saved === "2-ready") {
+                    enterMode2(box, true);
+                    return;
+                }
+                if (saved === "2-noinstall") {
+                    enterMode2(box, false);
+                    return;
+                }
+
                 var progress = getSavedProgress(boxKey);
                 var androidProgress = getAndroidProgress(boxKey);
                 if (androidProgress >= 0 && androidProgress > progress) progress = androidProgress;
@@ -1237,19 +1247,16 @@
                     (progress > 0 && progress < 100) ||
                     (androidProgress >= 0 && androidProgress > 0 && androidProgress < 100);
 
-                if (progress >= 100) {
-                    var canInstall = saved !== "2-noinstall" && (saved === "2-ready" || readyKeys.indexOf(boxKey) >= 0);
-                    enterMode2(box, canInstall);
-                    return;
-                }
                 if (isDownloading) {
                     restoreDownloadingBox(box, boxKey, progress);
                     return;
                 }
-                if (saved === "2-ready") {
+                if (progress >= 100) {
                     enterMode2(box, true);
-                } else if (saved === "2-noinstall") {
-                    enterMode2(box, false);
+                    return;
+                }
+                if (readyKeys.indexOf(boxKey) >= 0) {
+                    enterMode2(box, true);
                 }
             });
         }
